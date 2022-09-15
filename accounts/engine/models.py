@@ -68,8 +68,8 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
-    secret = models.TextField(default="")
-    secret2 = models.TextField(default="")
+    access_secret = models.TextField(default="")
+    refresh_secret = models.TextField(default="")
     secret_size = models.IntegerField(default=156)
 
     def __secret_generator(self):
@@ -77,21 +77,21 @@ class User(AbstractUser):
         return ''.join(random.choice(
             string.ascii_uppercase + string.digits) for _ in range(self.secret_size))
 
-    def generate_new_secret(self):
+    def generate_new_access_secret(self):
         """ Generates new access secret """
-        self.secret = self.__secret_generator()
+        self.access_secret = self.__secret_generator()
 
-    def generate_new_secret2(self):
+    def generate_new_refresh_secret(self):
         """ Generates new refresh secret """
-        self.secret2 = self.__secret_generator()
+        self.refresh_secret = self.__secret_generator()
 
-    def retrieve_secret(self):
+    def retrieve_access_secret(self):
         """ returns access secret """
-        return self.secret
+        return self.access_secret
 
-    def retrieve_secret2(self):
+    def retrieve_refresh_secret(self):
         """ returns refresh secret """
-        return self.secret2
+        return self.refresh_secret
 
     # pylint: disable=R0903
     class Meta:

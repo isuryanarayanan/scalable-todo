@@ -37,8 +37,8 @@ class UserLoginSerializer(serializers.Serializer):
             )
 
         # On a successfull authentication the user secret is updated
-        user.generate_new_secret()
-        user.generate_new_secret2()
+        user.generate_new_access_secret()
+        user.generate_new_refresh_secret()
         user.save()
 
         # Getting new tokens based on the user secret

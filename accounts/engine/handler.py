@@ -19,8 +19,8 @@ class JWTHandler():
     token = None
     user = None
 
-    secret = None
-    secret2 = None
+    access_secret = None
+    refresh_secret = None
     payload = None
 
     def __init__(self, params):
@@ -57,8 +57,8 @@ class JWTHandler():
     def __strap_user_secret(self):
         """ Straps the user secret from user object stored in state """
         try:
-            self.secret = self.user.retrieve_secret()
-            self.secret2 = self.user.retrieve_secret2()
+            self.access_secret = self.user.retrieve_access_secret()
+            self.refresh_secret = self.user.retrieve_refresh_secret()
         except Exception as exc:
             raise serializers.ValidationError(
                 "Error parsing user secret") from exc
@@ -75,7 +75,7 @@ class JWTHandler():
     def validate_access_token(self):
         """ Method for validating access token """
         try:
-            if jwt.encode(self.payload, self.secret, algorithm='HS256') == self.token:
+            if jwt.encode(self.payload, self.access_secret, algorithm='HS256') == self.token:
                 return True
             return None
         except Exception as exc:
@@ -85,7 +85,7 @@ class JWTHandler():
     def __validate_refresh_token(self):
         """ Method for validating refresh token """
         try:
-            if jwt.encode(self.payload, self.secret2, algorithm='HS256') == self.token:
+            if jwt.encode(self.payload, self.refresh_secret, algorithm='HS256') == self.token:
                 return True
             return None
         except Exception as exc:
@@ -97,7 +97,7 @@ class JWTHandler():
         try:
             if self.__validate_refresh_token():
                 # Refresh user's access secret
-                self.user.generate_new_secret()
+                self.user.generate_new_access_secret()
                 self.user.save()
 
                 # Encode new access token with new access secret
@@ -108,7 +108,7 @@ class JWTHandler():
                         "uid": self.user.id,
                         "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
                     },
-                    self.secret,
+                    self.access_secret,
                     algorithm='HS256'
                 )
             else:
@@ -126,7 +126,7 @@ class JWTHandler():
     def get_tokens(self):
         """ Returns a new set of JWT token encoded with users private secret """
         try:
-            if self.secret is not None and self.user is not None:
+            if self.access_secret is not None and self.user is not None:
 
                 # Generate new access token
                 self.access = jwt.encode(
@@ -135,7 +135,7 @@ class JWTHandler():
                         "uid": self.user.id,
                         "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
                     },
-                    self.secret,
+                    self.access_secret,
                     algorithm='HS256'
                 )
 
@@ -146,7 +146,7 @@ class JWTHandler():
                         "uid": self.user.id,
                         "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
                     },
-                    self.secret2,
+                    self.refresh_secret,
                     algorithm='HS256'
                 )
 
