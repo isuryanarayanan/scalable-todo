@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux'
-import { NAVBAR_MODES, getNavbarMode, setNavbarMode } from './navbar.slice'
-import { LOGIN } from '../../store/auth/actions'
+import { getLoggedIn } from '../../store/auth';
+import './navbar.css'
 
-function AuthenticatedNavbar() {
-    const dispatch = useDispatch()
+function AuthenticatedNavbar(dispatch) {
     return (
         <div className="navbar">
             <nav className="navbar navbar-expand-lg navbar-light bg-light">
@@ -12,13 +11,7 @@ function AuthenticatedNavbar() {
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <ul className="navbar-nav">
                         <li className="nav-item m-1">
-                            {/* <div className="btn btn-sm btn-danger"></div> */}
-                            {/* <div className="btn btn-sm btn-danger" onClick={() => {
-                                dispatch(setNavbarMode(NAVBAR_MODES.LOGGED_OUT))
-                            }}></div> */}
-                            <div className="btn btn-sm btn-danger" onClick={() => {
-                                dispatch(LOGIN())
-                            }}></div>
+                            <Link to="/logout" className='btn btn-primary btn-sm'>Logout</Link>
                         </li>
                     </ul>
                 </div>
@@ -28,10 +21,11 @@ function AuthenticatedNavbar() {
     )
 }
 
-function UnAuthenticatedNavbar() {
+function UnAuthenticatedNavbar(dispatch) {
     return (
         <div className="navbar">
-            <nav className="navbar navbar-expand-lg navbar-light bg-light">
+
+            <nav className="navbar  navbar-expand-lg ">
                 <a className="navbar-brand" href="#">Todo</a>
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <ul className="navbar-nav">
@@ -50,19 +44,14 @@ function UnAuthenticatedNavbar() {
 
 function Navbar() {
 
-    const navbarMode = useSelector(getNavbarMode)
+    const isAuthenticated = useSelector(getLoggedIn)
     const dispatch = useDispatch()
 
-    if (navbarMode === NAVBAR_MODES.LOGGED_IN) {
-        return AuthenticatedNavbar()
-    } else if (navbarMode === NAVBAR_MODES.LOGGED_OUT) {
-        return UnAuthenticatedNavbar()
-    } else if (navbarMode === NAVBAR_MODES.HIDE) {
-        return (
-            <div className="navbar"></div>
-        )
+    if (isAuthenticated) {
+        return AuthenticatedNavbar(dispatch)
+    } else {
+        return UnAuthenticatedNavbar(dispatch)
     }
-
 }
 
 export default Navbar

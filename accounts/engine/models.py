@@ -62,6 +62,7 @@ class User(AbstractUser):
     """ User Abstract model """
 
     email = models.EmailField(unique=True)
+    username = models.CharField(max_length=250, unique=False)
     mode = models.IntegerField(choices=user_modes, default=1, null=True)
     objects = UserManager()
 
@@ -92,6 +93,12 @@ class User(AbstractUser):
     def retrieve_refresh_secret(self):
         """ returns refresh secret """
         return self.refresh_secret
+
+    def revoke_tokens(self):
+        """ Revokes all tokens """
+        self.generate_new_access_secret()
+        self.generate_new_refresh_secret()
+        self.save()
 
     # pylint: disable=R0903
     class Meta:

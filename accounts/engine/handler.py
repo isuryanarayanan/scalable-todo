@@ -82,11 +82,22 @@ class JWTHandler():
             raise serializers.ValidationError(
                 "Error validating token") from exc
 
+    def get_authenticated_user(self):
+        """ Returns the authenticated user """
+        try:
+            if self.validate_access_token():
+                return self.user
+            return None
+        except Exception as exc:
+            raise serializers.ValidationError(
+                "Unable to authenticate user") from exc
+
     def __validate_refresh_token(self):
         """ Method for validating refresh token """
         try:
             if jwt.encode(self.payload, self.refresh_secret, algorithm='HS256') == self.token:
-                return True
+                if datetime.datetime.utcnow() < datetime.datetime.fromtimestamp(self.payload['exp']):
+                    return True
             return None
         except Exception as exc:
             raise serializers.ValidationError(
